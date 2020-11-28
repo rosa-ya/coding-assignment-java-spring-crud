@@ -1,18 +1,19 @@
 package com.gfg.product.model;
 
 import java.math.BigDecimal;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
+import lombok.Builder;
 
 @Entity
 @JsonRootName("product")
+@Builder
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id",nullable = false, updatable = false)
     private Long id;
     private String productId;
     private String title;

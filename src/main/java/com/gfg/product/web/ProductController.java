@@ -1,137 +1,77 @@
 package com.gfg.product.web;
 
+import com.gfg.product.ProductMapper;
 import com.gfg.product.model.Product;
+import com.gfg.product.model.dto.ProductDTO;
+import com.gfg.product.model.errors.ProductNotFoundException;
 import com.gfg.product.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private ProductRepository productRepository;
 
-    public ProductController(ProductRepository productRepository) {
-        this.productRepository=productRepository;
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
+
+
+    @GetMapping("findAll")
+    public ResponseEntity<List<ProductDTO>> findAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(productRepository.findAll().stream().map(this::buildProductDTO).collect(Collectors.toList()));
     }
 
-    public void setProductRepository(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductDTO buildProductDTO(Product product) {
+        return ProductDTO.builder()
+                .id(product.getId())
+                .productId(product.getProductId())
+                .title(product.getTitle())
+                .description(product.getDescription())
+                .brand(product.getBrand())
+                .price(product.getPrice())
+                .color(product.getColor())
+                .build();
     }
 
-    public ProductRepository getProductRepository() {
-        return productRepository;
+    public Product buildProduct(ProductDTO product) {
+        return Product.builder()
+                .productId(product.getProductId())
+                .title(product.getTitle())
+                .description(product.getDescription())
+                .brand(product.getBrand())
+                .price(product.getPrice())
+                .color(product.getColor())
+                .build();
     }
 
-    @PostMapping("findAll")
-    public ResponseEntity findAll() throws Exception {
-        ResponseEntity response = null;
-        List<Product> productList = null;
-        try {
-            productList = productRepository.findAll();
-            response = new ResponseEntity(productList, HttpStatus.OK);
-        } catch(Exception e) {
-            response = new ResponseEntity("No products found", HttpStatus.OK);
-        }
-       return response;
-    }
-
-    @PostMapping(value = "findById/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) throws Exception {
-
-        ResponseEntity<Product> response = null;
-        Product product = null;
-        try {
-            product = productRepository.findById(id).get();
-            response = new ResponseEntity(product, HttpStatus.OK);
-        } catch (Exception e) {
-            response = new ResponseEntity("Product Not Found with Id "+id, HttpStatus.OK);
-        }
-
-        return response;
+    @GetMapping(value = "findById/{id}")
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(productRepository.findById(id).map(this::buildProductDTO).orElseThrow(() -> new IllegalArgumentException()));
     }
 
     @PostMapping("/new")
-    ResponseEntity newProduct(@RequestBody Product product) {
-
-        ResponseEntity response = null;
-        Product savedProduct = null;
-        try {
-            savedProduct = productRepository.save(product);
-            response = new ResponseEntity(savedProduct, HttpStatus.OK);
-        } catch (Exception e) {
-            response = new ResponseEntity("Unable to save product " + product, HttpStatus.OK);
-        }
-
-        return response;
+    public ResponseEntity<ProductDTO> newProduct(@RequestBody ProductDTO product) {
+        return ResponseEntity.status(HttpStatus.OK).body(buildProductDTO(productRepository.save(buildProduct(product))));
     }
+
 
     @PostMapping(value = "updateById/{id}")
-    ResponseEntity updateProduct(@RequestBody Product product, @PathVariable Long id) throws Exception {
-
-        ResponseEntity response = null;
-        try {
-            Product existingProduct = productRepository.findById(id).get();
-
-            if(existingProduct == null) {
-                throw new Exception("Product to update does not exist");
-            } else {
-                product.setId(id);
-                if (product.getProductId() != null && !product.getProductId().trim().isEmpty()) {
-                    existingProduct.setProductId(product.getProductId());
-                }
-
-                if (product.getBrand() != null && !product.getBrand().trim().isEmpty()) {
-                    existingProduct.setBrand(product.getBrand());
-                }
-
-                if (product.getColor() != null && !product.getColor().trim().isEmpty()) {
-                    existingProduct.setColor(product.getColor());
-                }
-
-                if (product.getTitle() != null && !product.getTitle().trim().isEmpty()) {
-                    existingProduct.setTitle(product.getTitle());
-                }
-
-                if (product.getDescription() != null && !product.getDescription().trim().isEmpty()) {
-                    existingProduct.setDescription(product.getDescription());
-                }
-
-                if (product.getPrice() != null && product.getPrice().doubleValue() > 0) {
-                    existingProduct.setPrice(product.getPrice());
-                }
-
-                Product savedProduct = productRepository.save(existingProduct);
-                response = new ResponseEntity<>(savedProduct, HttpStatus.OK);
-
-            }
-        } catch (Exception e) {
-            response = new ResponseEntity("Unable to update product " + product, HttpStatus.OK);
-        }
-
-        return response;
+    public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO product, @PathVariable Long id) {
+        Product productToUpdate = productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException());
+        productMapper.updateProductFromDto(product, productToUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(buildProductDTO(productRepository.save(productToUpdate)));
     }
 
-    @PostMapping(value = "deleteById/{id}")
-    ResponseEntity<?> deleteProduct(@PathVariable Long id) throws Exception {
-
-        ResponseEntity<?> response = null;
-        try {
-            productRepository.deleteById(id);
-            response = new ResponseEntity<>(true, HttpStatus.OK);
-        } catch (Exception e) {
-            response = new ResponseEntity<>(false, HttpStatus.OK);
-
-        }
-        return response;
+    @DeleteMapping(value = "deleteById/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+        productRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("The product deleted successfully");
     }
 }
