@@ -16,10 +16,10 @@ import java.util.NoSuchElementException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * @author Rose
+ * This class use @RestControllerAdvice for exception handling in Restful API
  */
 
 @RestControllerAdvice

@@ -1,19 +1,29 @@
 package com.gfg.product.model;
 
-import java.math.BigDecimal;
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonRootName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+import java.math.BigDecimal;
+
+/*
+ Lombok is a java library that automatically plugs into your editor and build tools, spicing up your java.
+    Never write another getter or setter method again, with one annotation your class has a fully featured builder.
+*/
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @JsonRootName("product")
-@Builder
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id",nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
     private String productId;
     private String title;
@@ -22,32 +32,6 @@ public class Product {
     private BigDecimal price;
     private String color;
 
-    public Product(Long id, String productId, String title, String description, String brand,
-                   BigDecimal price, String color) {
-        super();
-        this.id = id;
-        this.productId = productId;
-        this.title = title;
-        this.description = description;
-        this.brand = brand;
-        this.price = price;
-        this.color = color;
-    }
-
-    public Product(String productId, String title, String description, String brand, BigDecimal price,
-                   String color) {
-        super();
-        this.productId = productId;
-        this.title = title;
-        this.description = description;
-        this.brand = brand;
-        this.price = price;
-        this.color = color;
-    }
-
-    public Product() {
-        super();
-    }
 
     @Override
     public int hashCode() {
@@ -110,60 +94,5 @@ public class Product {
         return true;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
 
 }
