@@ -45,3 +45,6 @@ Provide a list of violations in the current implementation
 * ProductServiceApplicationTests.java
 
     1. adding at least one assertion to this test case
+    
+    
+** There is no comments in code

@@ -20,6 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * @author Rose
+ * This class use @RestControllerAdvice for exception handling in Restful API
  */
 
 @RestControllerAdvice
